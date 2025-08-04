@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customizer Admin - DTF Print Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f6f6f7;
+            color: #202223;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #008060;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #6d7175;
+        }
+
+        .orders-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid #008060;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .order-id {
+            font-weight: bold;
+            color: #202223;
+        }
+
+        .order-date {
+            color: #6d7175;
+            font-size: 0.9rem;
+        }
+
+        .order-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-new { background: #e3f2fd; color: #1976d2; }
+        .status-pending { background: #fff3e0; color: #f57c00; }
+        .status-processing { background: #e8f5e8; color: #388e3c; }
+        .status-completed { background: #f3e5f5; color: #7b1fa2; }
+
+        .order-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: #6d7175;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-weight: 500;
+        }
+
+        .elements-summary {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .element-count {
+            background: #f6f6f7;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .element-count strong {
+            color: #008060;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #008060;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #006b4d;
+        }
+
+        .btn-secondary {
+            background: #f6f6f7;
+            color: #202223;
+            border: 1px solid #c9cccf;
+        }
+
+        .btn-secondary:hover {
+            background: #e1e3e5;
+        }
+
+        .btn-danger {
+            background: #d82c0d;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b32500;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6d7175;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 3rem;
+            color: #6d7175;
+        }
+
+        .no-orders h3 {
+            margin-bottom: 1rem;
+            color: #202223;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .order-details {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>�� Customizer Admin</h1>
+            <p>Håndter DTF-print ordrer og download billeder i høj kvalitet</p>
+        </div>
+
+        <div id="message"></div>
+        <div id="orders-container">
+            <div class="loading">Indlæser ordrer...</div>
+        </div>
+    </div>
+
+    <script>
+        // API base URL
+        const API_BASE = '/api/admin';
+
+        // Load ordrer når siden indlæses
+        document.addEventListener('DOMContentLoaded', loadOrders);
+
+        // Funktion til at indlæse alle ordrer
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_BASE}/orders`);
+                const orders = await response.json();
+
+                displayOrders(orders);
+            } catch (error) {
+                console.error('Fejl ved indlæsning af ordrer:', error);
+                showMessage('Der opstod en fejl ved indlæsning af ordrer', 'error');
+            }
+        }
+
+        // Funktion til at vise ordrer
+        function displayOrders(orders) {
+            const container = document.getElementById('orders-container');
+
+            if (orders.length === 0) {
+                container.innerHTML = `
+                    <div class="no-orders">
+                        <h3>Ingen customizer ordrer endnu</h3>
+                        <p>Når kunder bestiller produkter med tilpasninger, vil de vises her.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="orders-grid">
+                    ${orders.map(order => createOrderCard(order)).join('')}
+                </div>
+            `;
+        }
+
+        // Funktion til at oprette order card HTML
+        function createOrderCard(order) {
+            const date = new Date(order.createdAt).toLocaleDateString('da-DK', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const elementsHtml = Object.entries(order.elements)
+                .filter(([view, count]) => count > 0)
+                .map(([view, count]) => {
+                    const viewNames = {
+                        front: 'Front',
+                        back: 'Ryg',
+                        sleeve_right: 'Højre ærme',
+                        sleeve_left: 'Venstre ærme'
+                    };
+                    return `<div class="element-count"><strong>${count}</strong> ${viewNames[view] || view}</div>`;
+                }).join('');
+
+            return `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Ordre #${order.orderId}</div>
+                            <div class="order-date">${date}</div>
+                        </div>
+                        <div class="order-status status-${order.status}">${getStatusText(order.status)}</div>
+                    </div>
+
+                    <div class="order-details">
+                        <div class="detail-group">
+                            <div class="detail-label">Customizer pris</div>
+                            <div class="detail-value">${order.customizerPrice} kr</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">${getStatusText(order.status)}</div>
+                        </div>
+                    </div>
+
+                    <div class="elements-summary">
+                        ${elementsHtml}
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="downloadAllImages('${order.orderId}')">
+                            📥 Download Alle Billeder
+                        </button>
+                        <button class="btn btn-secondary" onclick="viewOrderDetails('${order.orderId}')">
+                            👁️ Se Detaljer
+                        </button>
+                        <button class="btn btn-secondary" onclick="updateStatus('${order.orderId}', 'processing')">
+                            ⚙️ Sæt i Produktion
+                        </button>
+                        <button class="btn btn-secondary" onclick="updateStatus('${order.orderId}', 'completed')">
+                            ✅ Marker Færdig
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Funktion til at downloade alle billeder for en ordre
+        async function downloadAllImages(orderId) {
+            try {
+                showMessage('Downloader billeder...', 'success');
+
+                const response = await fetch(`${API_BASE}/orders/${orderId}/download-all`);
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `customizer_order_${orderId}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                    showMessage('Billeder downloadet succesfuldt!', 'success');
+                } else {
+                    throw new Error('Download fejlede');
+                }
+            } catch (error) {
+                console.error('Fejl ved download:', error);
+                showMessage('Der opstod en fejl ved download af billeder', 'error');
+            }
+        }
+
+        // Funktion til at se order detaljer
+        async function viewOrderDetails(orderId) {
+            try {
+                const response = await fetch(`${API_BASE}/orders/${orderId}`);
+                const order = await response.json();
+
+                // Vis detaljer i en modal eller ny side
+                const details = `
+                    Ordre #${order.orderId}
+                    Kunde: ${order.customerName || 'Ukendt'}
+                    Email: ${order.customerEmail || 'Ukendt'}
+                    Customizer pris: ${order.customizerPrice} kr
+                    Oprettet: ${new Date(order.createdAt).toLocaleString('da-DK')}
+
+                    Elementer:
+                    ${Object.entries(order.elements).map(([view, elements]) =>
+                        `${view}: ${elements.length} elementer`
+                    ).join('\n')}
+                `;
+
+                alert(details);
+            } catch (error) {
+                console.error('Fejl ved hentning af detaljer:', error);
+                showMessage('Der opstod en fejl ved hentning af detaljer', 'error');
+            }
+        }
+
+        // Funktion til at opdatere order status
+        async function updateStatus(orderId, status) {
+            try {
+                const response = await fetch(`${API_BASE}/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (response.ok) {
+                    showMessage('Status opdateret succesfuldt!', 'success');
+                    loadOrders(); // Genindlæs ordrer
+                } else {
+                    throw new Error('Status opdatering fejlede');
+                }
+            } catch (error) {
+                console.error('Fejl ved status opdatering:', error);
+                showMessage('Der opstod en fejl ved opdatering af status', 'error');
+            }
+        }
+
+        // Funktion til at vise beskeder
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="${type}">${message}</div>`;
+
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Funktion til at få status tekst
+        function getStatusText(status) {
+            const statusTexts = {
+                'new': 'Ny',
+                'pending': 'Afventer',
+                'processing': 'I Produktion',
+                'completed': 'Færdig'
+            };
+            return statusTexts[status] || status;
+        }
+    </script>
+</body>
+</html>
