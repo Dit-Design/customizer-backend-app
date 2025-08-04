@@ -4,6 +4,19 @@ const path = require('path');
 const { createCanvas, loadImage } = require('canvas');
 
 const app = express();
+// CORS middleware - tillad requests fra Shopify
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://dit-design.dk');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // Håndter preflight requests
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 app.use(express.json({ limit: '50mb' }));
 
 // Shopify app konfiguration - med fallback hvis API ikke er tilgængelig
@@ -308,4 +321,5 @@ app.listen(PORT, () => {
   console.log(`Customizer backend app kører på port ${PORT}`);
   console.log(`Admin interface: http://localhost:${PORT}/admin`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+
 }); 
