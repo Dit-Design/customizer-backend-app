@@ -1,5 +1,4 @@
 const express = require('express');
-const Shopify = require('@shopify/shopify-api');
 const fs = require('fs').promises;
 const path = require('path');
 const { createCanvas, loadImage } = require('canvas');
@@ -7,15 +6,22 @@ const { createCanvas, loadImage } = require('canvas');
 const app = express();
 app.use(express.json({ limit: '50mb' }));
 
-// Shopify app konfiguration
-const shopify = new Shopify({
-  apiKey: process.env.SHOPIFY_API_KEY,
-  apiSecretKey: process.env.SHOPIFY_API_SECRET,
-  scopes: ['read_products', 'write_products', 'read_orders', 'write_orders'],
-  hostName: process.env.HOST.replace(/https:\/\//, ''),
-  isEmbeddedApp: true,
-  apiVersion: '2024-01'
-});
+// Shopify app konfiguration - med fallback hvis API ikke er tilgængelig
+let shopify = null;
+try {
+  const Shopify = require('@shopify/shopify-api');
+  shopify = new Shopify({
+    apiKey: process.env.SHOPIFY_API_KEY || 'test_key',
+    apiSecretKey: process.env.SHOPIFY_API_SECRET || 'test_secret',
+    scopes: ['read_products', 'write_products', 'read_orders', 'write_orders'],
+    hostName: (process.env.HOST || 'localhost:3000').replace(/https?:\/\//, ''),
+    isEmbeddedApp: true,
+    apiVersion: '2024-01'
+  });
+  console.log('Shopify API initialiseret');
+} catch (error) {
+  console.log('Shopify API ikke tilgængelig, kører uden webhook support:', error.message);
+}
 
 // Database til at gemme customizer data
 let customizerOrders = new Map();
@@ -235,46 +241,71 @@ app.put('/api/admin/orders/:orderId/status', (req, res) => {
   res.json({ success: true, order });
 });
 
-// Webhook til at håndtere ordre oprettelse
-app.post('/webhooks/orders/create', async (req, res) => {
-  try {
-    const order = req.body;
-    
-    // Find customizer data i line items
-    for (const item of order.line_items) {
-      if (item.properties && item.properties._customizer_data) {
-        const customizerData = JSON.parse(item.properties._customizer_data);
-        const orderId = order.id.toString();
-        
-        // Gem billeder og data
-        await saveCustomizerImages(customizerData, orderId);
-        
-        // Opdater order med rigtig ID
-        customizerOrders.set(orderId, {
-          ...customizerData,
-          orderId,
-          shopifyOrderId: order.id,
-          customerEmail: order.email,
-          customerName: `${order.billing_address?.first_name || ''} ${order.billing_address?.last_name || ''}`.trim(),
-          createdAt: new Date().toISOString(),
-          status: 'new'
-        });
-        
-        console.log(`Customizer data gemt for ordre ${orderId}`);
+// Webhook til at håndtere ordre oprettelse (kun hvis Shopify API er tilgængelig)
+if (shopify) {
+  app.post('/webhooks/orders/create', async (req, res) => {
+    try {
+      const order = req.body;
+      
+      // Find customizer data i line items
+      for (const item of order.line_items) {
+        if (item.properties && item.properties._customizer_data) {
+          const customizerData = JSON.parse(item.properties._customizer_data);
+          const orderId = order.id.toString();
+          
+          // Gem billeder og data
+          await saveCustomizerImages(customizerData, orderId);
+          
+          // Opdater order med rigtig ID
+          customizerOrders.set(orderId, {
+            ...customizerData,
+            orderId,
+            shopifyOrderId: order.id,
+            customerEmail: order.email,
+            customerName: `${order.billing_address?.first_name || ''} ${order.billing_address?.last_name || ''}`.trim(),
+            createdAt: new Date().toISOString(),
+            status: 'new'
+          });
+          
+          console.log(`Customizer data gemt for ordre ${orderId}`);
+        }
       }
+      
+      res.status(200).send('OK');
+    } catch (error) {
+      console.error('Fejl ved webhook:', error);
+      res.status(500).send('Error');
     }
-    
-    res.status(200).send('OK');
-  } catch (error) {
-    console.error('Fejl ved webhook:', error);
-    res.status(500).send('Error');
-  }
+  });
+} else {
+  console.log('Webhook endpoint ikke tilgængelig - Shopify API mangler');
+}
+
+// Test endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Customizer Backend App kører!', 
+    status: 'online',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Serve admin interface
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
 
 const PORT = process.env.PORT || 3000;
+
+// Bedre fejlhåndtering
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 app.listen(PORT, () => {
   console.log(`Customizer backend app kører på port ${PORT}`);
+  console.log(`Admin interface: http://localhost:${PORT}/admin`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 }); 
