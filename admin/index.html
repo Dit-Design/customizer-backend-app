@@ -10,20 +10,20 @@
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: -apple-system, BlinkMacMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f6f6f7;
             color: #202223;
             line-height: 1.5;
         }
-
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
         }
-
+        
         .header {
             background: white;
             padding: 2rem;
@@ -31,21 +31,21 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
         }
-
+        
         .header h1 {
             color: #008060;
             margin-bottom: 0.5rem;
         }
-
+        
         .header p {
             color: #6d7175;
         }
-
+        
         .orders-grid {
             display: grid;
             gap: 1rem;
         }
-
+        
         .order-card {
             background: white;
             border-radius: 8px;
@@ -53,82 +53,161 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border-left: 4px solid #008060;
         }
-
+        
         .order-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
         }
-
+        
         .order-id {
             font-weight: bold;
             color: #202223;
         }
-
+        
         .order-date {
             color: #6d7175;
             font-size: 0.9rem;
         }
-
+        
         .order-status {
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 500;
         }
-
+        
         .status-new { background: #e3f2fd; color: #1976d2; }
         .status-pending { background: #fff3e0; color: #f57c00; }
         .status-processing { background: #e8f5e8; color: #388e3c; }
         .status-completed { background: #f3e5f5; color: #7b1fa2; }
-
+        
         .order-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
             margin-bottom: 1rem;
         }
-
+        
         .detail-group {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
         }
-
+        
         .detail-label {
             font-size: 0.8rem;
             color: #6d7175;
             font-weight: 500;
         }
-
+        
         .detail-value {
             font-weight: 500;
         }
-
+        
         .elements-summary {
             display: flex;
             gap: 1rem;
             margin-bottom: 1rem;
         }
-
+        
         .element-count {
             background: #f6f6f7;
             padding: 0.5rem 1rem;
             border-radius: 6px;
             font-size: 0.9rem;
         }
-
+        
         .element-count strong {
             color: #008060;
         }
-
+        
+        /* Canvas Preview Styles */
+        .canvas-preview-section {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .canvas-preview-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #202223;
+        }
+        
+        .canvas-views {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .canvas-view {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .canvas-view-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #008060;
+            text-align: center;
+        }
+        
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .canvas-element {
+            position: absolute;
+            border: 2px solid #008060;
+            background: rgba(0, 128, 96, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #008060;
+            font-weight: 600;
+            text-align: center;
+            word-break: break-word;
+        }
+        
+        .canvas-element.image {
+            background: rgba(0, 128, 96, 0.2);
+            border-color: #006b4d;
+        }
+        
+        .canvas-element.text {
+            background: rgba(0, 128, 96, 0.1);
+            border-color: #008060;
+        }
+        
+        .element-info {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #6d7175;
+        }
+        
+        .element-info strong {
+            color: #202223;
+        }
+        
         .action-buttons {
             display: flex;
             gap: 0.75rem;
             flex-wrap: wrap;
         }
-
+        
         .btn {
             padding: 0.75rem 1.5rem;
             border: none;
@@ -142,41 +221,41 @@
             gap: 0.5rem;
             transition: all 0.2s;
         }
-
+        
         .btn-primary {
             background: #008060;
             color: white;
         }
-
+        
         .btn-primary:hover {
             background: #006b4d;
         }
-
+        
         .btn-secondary {
             background: #f6f6f7;
             color: #202223;
             border: 1px solid #c9cccf;
         }
-
+        
         .btn-secondary:hover {
             background: #e1e3e5;
         }
-
+        
         .btn-danger {
             background: #d82c0d;
             color: white;
         }
-
+        
         .btn-danger:hover {
             background: #b32500;
         }
-
+        
         .loading {
             text-align: center;
             padding: 2rem;
             color: #6d7175;
         }
-
+        
         .error {
             background: #fed7d7;
             color: #c53030;
@@ -184,7 +263,7 @@
             border-radius: 6px;
             margin-bottom: 1rem;
         }
-
+        
         .success {
             background: #c6f6d5;
             color: #22543d;
@@ -192,33 +271,37 @@
             border-radius: 6px;
             margin-bottom: 1rem;
         }
-
+        
         .no-orders {
             text-align: center;
             padding: 3rem;
             color: #6d7175;
         }
-
+        
         .no-orders h3 {
             margin-bottom: 1rem;
             color: #202223;
         }
-
+        
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
             }
-
+            
             .order-details {
                 grid-template-columns: 1fr;
             }
-
+            
             .action-buttons {
                 flex-direction: column;
             }
-
+            
             .btn {
                 justify-content: center;
+            }
+            
+            .canvas-views {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -229,37 +312,41 @@
             <h1>�� Customizer Admin</h1>
             <p>Håndter DTF-print ordrer og download billeder i høj kvalitet</p>
         </div>
-
+        
         <div id="message"></div>
         <div id="orders-container">
             <div class="loading">Indlæser ordrer...</div>
         </div>
     </div>
-
+    
     <script>
         // API base URL
         const API_BASE = '/api/admin';
-
+        
+        // Canvas dimensions (same as frontend)
+        const CANVAS_WIDTH = 400;
+        const CANVAS_HEIGHT = 500;
+        
         // Load ordrer når siden indlæses
         document.addEventListener('DOMContentLoaded', loadOrders);
-
+        
         // Funktion til at indlæse alle ordrer
         async function loadOrders() {
             try {
                 const response = await fetch(`${API_BASE}/orders`);
                 const orders = await response.json();
-
+                
                 displayOrders(orders);
             } catch (error) {
                 console.error('Fejl ved indlæsning af ordrer:', error);
                 showMessage('Der opstod en fejl ved indlæsning af ordrer', 'error');
             }
         }
-
+        
         // Funktion til at vise ordrer
         function displayOrders(orders) {
             const container = document.getElementById('orders-container');
-
+            
             if (orders.length === 0) {
                 container.innerHTML = `
                     <div class="no-orders">
@@ -269,14 +356,14 @@
                 `;
                 return;
             }
-
+            
             container.innerHTML = `
                 <div class="orders-grid">
                     ${orders.map(order => createOrderCard(order)).join('')}
                 </div>
             `;
         }
-
+        
         // Funktion til at oprette order card HTML
         function createOrderCard(order) {
             const date = new Date(order.createdAt).toLocaleDateString('da-DK', {
@@ -286,19 +373,22 @@
                 hour: '2-digit',
                 minute: '2-digit'
             });
-
+            
             const elementsHtml = Object.entries(order.elements)
-                .filter(([view, count]) => count > 0)
-                .map(([view, count]) => {
+                .filter(([view, elements]) => elements && elements.length > 0)
+                .map(([view, elements]) => {
                     const viewNames = {
                         front: 'Front',
                         back: 'Ryg',
                         sleeve_right: 'Højre ærme',
                         sleeve_left: 'Venstre ærme'
                     };
-                    return `<div class="element-count"><strong>${count}</strong> ${viewNames[view] || view}</div>`;
+                    return `<div class="element-count"><strong>${elements.length}</strong> ${viewNames[view] || view}</div>`;
                 }).join('');
-
+            
+            // Generate canvas preview HTML
+            const canvasPreviewHtml = generateCanvasPreview(order.elements);
+            
             return `
                 <div class="order-card">
                     <div class="order-header">
@@ -308,7 +398,7 @@
                         </div>
                         <div class="order-status status-${order.status}">${getStatusText(order.status)}</div>
                     </div>
-
+                    
                     <div class="order-details">
                         <div class="detail-group">
                             <div class="detail-label">Customizer pris</div>
@@ -319,11 +409,13 @@
                             <div class="detail-value">${getStatusText(order.status)}</div>
                         </div>
                     </div>
-
+                    
                     <div class="elements-summary">
                         ${elementsHtml}
                     </div>
-
+                    
+                    ${canvasPreviewHtml}
+                    
                     <div class="action-buttons">
                         <button class="btn btn-primary" onclick="downloadAllImages('${order.orderId}')">
                             📥 Download Alle Billeder
@@ -341,14 +433,100 @@
                 </div>
             `;
         }
-
+        
+        // Funktion til at generere canvas preview
+        function generateCanvasPreview(elements) {
+            const viewNames = {
+                front: 'Front',
+                back: 'Ryg',
+                sleeve_right: 'Højre ærme',
+                sleeve_left: 'Venstre ærme'
+            };
+            
+            let hasElements = false;
+            const viewsHtml = Object.entries(elements).map(([view, viewElements]) => {
+                if (!viewElements || viewElements.length === 0) return '';
+                
+                hasElements = true;
+                const elementsHtml = viewElements.map((element, index) => {
+                    // Calculate position and size based on canvas dimensions
+                    const left = (element.x / CANVAS_WIDTH) * 100;
+                    const top = (element.y / CANVAS_HEIGHT) * 100;
+                    const width = (element.width / CANVAS_WIDTH) * 100;
+                    const height = (element.height / CANVAS_HEIGHT) * 100;
+                    
+                    const elementType = element.type || 'text';
+                    const elementClass = elementType === 'image' ? 'image' : 'text';
+                    
+                    let elementText = '';
+                    if (elementType === 'image') {
+                        elementText = `Billede ${index + 1}`;
+                    } else {
+                        elementText = element.text || `Tekst ${index + 1}`;
+                        if (elementText.length > 15) {
+                            elementText = elementText.substring(0, 15) + '...';
+                        }
+                    }
+                    
+                    const sizeText = `${Math.round(element.width)}×${Math.round(element.height)}px`;
+                    
+                    // Get additional element details
+                    let additionalInfo = '';
+                    if (elementType === 'text') {
+                        additionalInfo = `Font: ${element.font || 'Arial'}, ${element.fontSize || '24'}px`;
+                        if (element.color) {
+                            additionalInfo += `, Farve: ${element.color}`;
+                        }
+                    } else if (elementType === 'image') {
+                        if (element.rotation) {
+                            additionalInfo = `Rotation: ${Math.round(element.rotation)}°`;
+                        }
+                    }
+                    
+                    return `
+                        <div class="canvas-element ${elementClass}" 
+                             style="left: ${left}%; top: ${top}%; width: ${width}%; height: ${height}%;">
+                            ${elementText}
+                        </div>
+                        <div class="element-info">
+                            <strong>${elementText}</strong><br>
+                            Position: ${Math.round(element.x)}, ${Math.round(element.y)}<br>
+                            Størrelse: ${sizeText}<br>
+                            ${additionalInfo ? additionalInfo + '<br>' : ''}
+                            Type: ${elementType === 'image' ? 'Billede' : 'Tekst'}
+                        </div>
+                    `;
+                }).join('');
+                
+                return `
+                    <div class="canvas-view">
+                        <div class="canvas-view-title">${viewNames[view] || view}</div>
+                        <div class="canvas-container">
+                            ${elementsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (!hasElements) return '';
+            
+            return `
+                <div class="canvas-preview-section">
+                    <div class="canvas-preview-title">🎨 Design Preview - Element Placering og Størrelser</div>
+                    <div class="canvas-views">
+                        ${viewsHtml}
+                    </div>
+                </div>
+            `;
+        }
+        
         // Funktion til at downloade alle billeder for en ordre
         async function downloadAllImages(orderId) {
             try {
                 showMessage('Downloader billeder...', 'success');
-
+                
                 const response = await fetch(`${API_BASE}/orders/${orderId}/download-all`);
-
+                
                 if (response.ok) {
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
@@ -359,7 +537,7 @@
                     a.click();
                     document.body.removeChild(a);
                     window.URL.revokeObjectURL(url);
-
+                    
                     showMessage('Billeder downloadet succesfuldt!', 'success');
                 } else {
                     throw new Error('Download fejlede');
@@ -369,13 +547,13 @@
                 showMessage('Der opstod en fejl ved download af billeder', 'error');
             }
         }
-
+        
         // Funktion til at se order detaljer
         async function viewOrderDetails(orderId) {
             try {
                 const response = await fetch(`${API_BASE}/orders/${orderId}`);
                 const order = await response.json();
-
+                
                 // Vis detaljer i en modal eller ny side
                 const details = `
                     Ordre #${order.orderId}
@@ -383,20 +561,20 @@
                     Email: ${order.customerEmail || 'Ukendt'}
                     Customizer pris: ${order.customizerPrice} kr
                     Oprettet: ${new Date(order.createdAt).toLocaleString('da-DK')}
-
+                    
                     Elementer:
-                    ${Object.entries(order.elements).map(([view, elements]) =>
+                    ${Object.entries(order.elements).map(([view, elements]) => 
                         `${view}: ${elements.length} elementer`
                     ).join('\n')}
                 `;
-
+                
                 alert(details);
             } catch (error) {
                 console.error('Fejl ved hentning af detaljer:', error);
                 showMessage('Der opstod en fejl ved hentning af detaljer', 'error');
             }
         }
-
+        
         // Funktion til at opdatere order status
         async function updateStatus(orderId, status) {
             try {
@@ -407,7 +585,7 @@
                     },
                     body: JSON.stringify({ status })
                 });
-
+                
                 if (response.ok) {
                     showMessage('Status opdateret succesfuldt!', 'success');
                     loadOrders(); // Genindlæs ordrer
@@ -419,17 +597,17 @@
                 showMessage('Der opstod en fejl ved opdatering af status', 'error');
             }
         }
-
+        
         // Funktion til at vise beskeder
         function showMessage(message, type) {
             const messageDiv = document.getElementById('message');
             messageDiv.innerHTML = `<div class="${type}">${message}</div>`;
-
+            
             setTimeout(() => {
                 messageDiv.innerHTML = '';
             }, 5000);
         }
-
+        
         // Funktion til at få status tekst
         function getStatusText(status) {
             const statusTexts = {
