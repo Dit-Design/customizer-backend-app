@@ -140,7 +140,7 @@
         
         .canvas-views {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
         }
         
@@ -184,7 +184,7 @@
         }
         
         .canvas-element.image {
-            background: transparent;
+            background: rgba(0, 128, 96, 0.2);
             border-color: #006b4d;
         }
         
@@ -205,9 +205,6 @@
             margin-top: 0.5rem;
             font-size: 0.8rem;
             color: #6d7175;
-            background: #f8f9fa;
-            padding: 0.5rem;
-            border-radius: 4px;
         }
         
         .element-info strong {
@@ -339,8 +336,9 @@
         const CANVAS_WIDTH = 400;
         const CANVAS_HEIGHT = 500;
         
-        // Conversion factor: 1 pixel ≈ 0.26 mm for DTF print
-        const PIXEL_TO_MM = 0.26;
+        // Admin canvas display dimensions
+        const ADMIN_CANVAS_WIDTH = 300;
+        const ADMIN_CANVAS_HEIGHT = 300;
         
         // Load ordrer når siden indlæses
         document.addEventListener('DOMContentLoaded', loadOrders);
@@ -449,6 +447,9 @@
             `;
         }
         
+        // Conversion factor: 1 pixel ≈ 0.26 mm for DTF print
+        const PIXEL_TO_MM = 0.26;
+        
         // Funktion til at generere canvas preview
         function generateCanvasPreview(elements) {
             const viewNames = {
@@ -458,12 +459,20 @@
                 sleeve_left: 'Venstre ærme'
             };
             
-            // Produkt billeder for hver view - rigtige produktbilleder
+            // Produkt billeder for hver view - prøv forskellige URL'er
             const productImages = {
-                front: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg?v=1',
-                back: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg?v=1',
-                sleeve_right: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg?v=1',
-                sleeve_left: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg?v=1'
+                front: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg',
+                back: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg',
+                sleeve_right: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg',
+                sleeve_left: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg'
+            };
+            
+            // Test med et generisk t-shirt billede hvis hovedbillederne ikke virker
+            const testProductImages = {
+                front: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop',
+                back: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop',
+                sleeve_right: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop',
+                sleeve_left: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop'
             };
             
             // Fallback billeder hvis hovedbillederne ikke indlæses
@@ -480,6 +489,7 @@
                 
                 hasElements = true;
                 const elementsHtml = viewElements.map((element, index) => {
+                    // Definer elementType først
                     const elementType = element.type || 'text';
                     
                     // Sikre at element har korrekte width/height værdier
@@ -499,7 +509,7 @@
                     elementWidth = Math.max(elementWidth, 20);
                     elementHeight = Math.max(elementHeight, 20);
                     
-                    // Calculate position and size based on canvas dimensions
+                    // Calculate position and size based on admin canvas display dimensions
                     const left = (element.x / CANVAS_WIDTH) * 100;
                     const top = (element.y / CANVAS_HEIGHT) * 100;
                     const width = (elementWidth / CANVAS_WIDTH) * 100;
@@ -557,8 +567,11 @@
                 return `
                     <div class="canvas-view">
                         <div class="canvas-view-title">${viewNames[view] || view}</div>
-                        <div class="canvas-container" style="background-image: url('${productImages[view]}'), url('${fallbackImages[view]}'); background-size: contain; background-repeat: no-repeat; background-position: center; background-color: white;">
+                        <div class="canvas-container" style="background-image: url('${testProductImages[view]}'), url('${productImages[view]}'), url('${fallbackImages[view]}'); background-size: contain; background-repeat: no-repeat; background-position: center; background-color: white;">
                             ${elementsHtml}
+                        </div>
+                        <div style="font-size: 0.7rem; color: #666; text-align: center; margin-top: 0.5rem;">
+                            Produktbillede: ${productImages[view]}
                         </div>
                     </div>
                 `;
