@@ -90,6 +90,10 @@
             margin-bottom: 1rem;
         }
         
+        .order-details .detail-group:nth-child(3) {
+            grid-column: 1 / -1;
+        }
+        
         .detail-group {
             display: flex;
             flex-direction: column;
@@ -318,7 +322,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>�� Customizer Admin</h1>
+            <h1>🎨 Customizer Admin</h1>
             <p>Håndter DTF-print ordrer og download billeder i høj kvalitet</p>
         </div>
         
@@ -339,6 +343,10 @@
         // Admin canvas display dimensions
         const ADMIN_CANVAS_WIDTH = 300;
         const ADMIN_CANVAS_HEIGHT = 300;
+        
+        // Real-world product dimensions (in mm) - skal matche kundens produkt
+        const PRODUCT_WIDTH_MM = 200;  // Standard produktbredde i mm
+        const PRODUCT_HEIGHT_MM = 110; // Standard produkt højde i mm
         
         // Load ordrer når siden indlæses
         document.addEventListener('DOMContentLoaded', loadOrders);
@@ -400,7 +408,7 @@
                 }).join('');
             
             // Generate canvas preview HTML
-            const canvasPreviewHtml = generateCanvasPreview(order.elements);
+            const canvasPreviewHtml = generateCanvasPreview(order.elements, order);
             
             return `
                 <div class="order-card">
@@ -421,6 +429,12 @@
                             <div class="detail-label">Status</div>
                             <div class="detail-value">${getStatusText(order.status)}</div>
                         </div>
+                        ${order.productInfo ? `
+                        <div class="detail-group">
+                            <div class="detail-label">Produkt</div>
+                            <div class="detail-value">${order.productInfo.title} - ${order.productInfo.variantTitle}</div>
+                        </div>
+                        ` : ''}
                     </div>
                     
                     <div class="elements-summary">
@@ -451,7 +465,7 @@
         const PIXEL_TO_MM = 0.26;
         
         // Funktion til at generere canvas preview
-        function generateCanvasPreview(elements) {
+        function generateCanvasPreview(elements, order) {
             const viewNames = {
                 front: 'Front',
                 back: 'Ryg',
@@ -459,20 +473,12 @@
                 sleeve_left: 'Venstre ærme'
             };
             
-            // Produkt billeder for hver view - prøv forskellige URL'er
+            // Produkt billeder for hver view - brug kundens valgte produkt
             const productImages = {
-                front: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg',
-                back: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg',
-                sleeve_right: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg',
-                sleeve_left: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg'
-            };
-            
-            // Test med et generisk t-shirt billede hvis hovedbillederne ikke virker
-            const testProductImages = {
-                front: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop',
-                back: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop',
-                sleeve_right: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop',
-                sleeve_left: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop'
+                front: order.productInfo?.images?.front || 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg',
+                back: order.productInfo?.images?.back || 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg',
+                sleeve_right: order.productInfo?.images?.sleeve_right || 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg',
+                sleeve_left: order.productInfo?.images?.sleeve_left || 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg'
             };
             
             // Fallback billeder hvis hovedbillederne ikke indlæses
@@ -505,15 +511,19 @@
                         elementHeight = element.height || 100;
                     }
                     
+                    // Anvend scale til elementstørrelse
+                    const scaledWidth = elementWidth * (element.scale || 1);
+                    const scaledHeight = elementHeight * (element.scale || 1);
+                    
                     // Sikre minimum størrelse
-                    elementWidth = Math.max(elementWidth, 20);
-                    elementHeight = Math.max(elementHeight, 20);
+                    const finalWidth = Math.max(scaledWidth, 20);
+                    const finalHeight = Math.max(scaledHeight, 20);
                     
                     // Calculate position and size based on admin canvas display dimensions
                     const left = (element.x / CANVAS_WIDTH) * 100;
                     const top = (element.y / CANVAS_HEIGHT) * 100;
-                    const width = (elementWidth / CANVAS_WIDTH) * 100;
-                    const height = (elementHeight / CANVAS_HEIGHT) * 100;
+                    const width = (finalWidth / CANVAS_WIDTH) * 100;
+                    const height = (finalHeight / CANVAS_HEIGHT) * 100;
                     
                     const elementClass = elementType === 'image' ? 'image' : 'text';
                     
@@ -530,11 +540,11 @@
                         elementContent = `<div style="font-family: ${element.font || 'Arial'}; font-size: ${element.fontSize || 24}px; color: ${element.color || '#000000'}; text-align: center; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; word-break: break-word;">${elementText}</div>`;
                     }
                     
-                    // Konverter pixels til mm
-                    const widthMm = Math.round(elementWidth * PIXEL_TO_MM);
-                    const heightMm = Math.round(elementHeight * PIXEL_TO_MM);
-                    const xMm = Math.round(element.x * PIXEL_TO_MM);
-                    const yMm = Math.round(element.y * PIXEL_TO_MM);
+                    // Konverter pixels til mm baseret på faktiske elementstørrelser
+                    const widthMm = Math.round((elementWidth * element.scale) * 0.26); // 0.26 mm per pixel
+                    const heightMm = Math.round((elementHeight * element.scale) * 0.26);
+                    const xMm = Math.round(element.x * 0.26);
+                    const yMm = Math.round(element.y * 0.26);
                     
                     // Get additional element details
                     let additionalInfo = '';
@@ -557,7 +567,8 @@
                         <div class="element-info">
                             <strong>${elementText}</strong><br>
                             Position: ${Math.round(element.x)}, ${Math.round(element.y)}px (${xMm}×${yMm}mm)<br>
-                            Størrelse: ${Math.round(elementWidth)}×${Math.round(elementHeight)}px (${widthMm}×${heightMm}mm)<br>
+                            Størrelse: ${Math.round(finalWidth)}×${Math.round(finalHeight)}px (${widthMm}×${heightMm}mm)<br>
+                            ${element.scale && element.scale !== 1 ? `Skala: ${element.scale}x<br>` : ''}
                             ${additionalInfo ? additionalInfo + '<br>' : ''}
                             Type: ${elementType === 'image' ? 'Billede' : 'Tekst'}
                         </div>
@@ -567,7 +578,7 @@
                 return `
                     <div class="canvas-view">
                         <div class="canvas-view-title">${viewNames[view] || view}</div>
-                        <div class="canvas-container" style="background-image: url('${testProductImages[view]}'), url('${productImages[view]}'), url('${fallbackImages[view]}'); background-size: contain; background-repeat: no-repeat; background-position: center; background-color: white;">
+                        <div class="canvas-container" style="background-image: url('${productImages[view]}'), url('${fallbackImages[view]}'); background-size: contain; background-repeat: no-repeat; background-position: center; background-color: white;">
                             ${elementsHtml}
                         </div>
                         <div style="font-size: 0.7rem; color: #666; text-align: center; margin-top: 0.5rem;">
