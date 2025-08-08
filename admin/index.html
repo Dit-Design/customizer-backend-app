@@ -189,8 +189,9 @@
         }
         
         .canvas-element.text {
-            background: rgba(0, 128, 96, 0.1);
+            background: transparent;
             border-color: #008060;
+            border-style: dashed;
         }
         
         .canvas-element img {
@@ -457,12 +458,12 @@
                 sleeve_left: 'Venstre ærme'
             };
             
-            // Produkt billeder for hver view - placeholder billeder
+            // Produkt billeder for hver view - rigtige produktbilleder
             const productImages = {
-                front: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZjNzE3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkZyb250IFByb2R1a3Q8L3RleHQ+PC9zdmc+',
-                back: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZjNzE3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkJhY2sgUHJvZHVrdDwvdGV4dD48L3N2Zz4=',
-                sleeve_right: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZjNzE3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkhvamVyZSBBcm1lPC90ZXh0Pjwvc3ZnPg==',
-                sleeve_left: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZjNzE3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlZlbnN0cmUgQXJtZTwvdGV4dD48L3N2Zz4='
+                front: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg',
+                back: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg',
+                sleeve_right: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg',
+                sleeve_left: 'https://dit-design.dk/cdn/shop/files/IMG_20240808_140000.jpg'
             };
             
             let hasElements = false;
@@ -471,9 +472,20 @@
                 
                 hasElements = true;
                 const elementsHtml = viewElements.map((element, index) => {
+                    const elementType = element.type || 'text';
+                    
                     // Sikre at element har korrekte width/height værdier
-                    const elementWidth = element.width || element.fontSize || 24;
-                    const elementHeight = element.height || element.fontSize || 24;
+                    let elementWidth, elementHeight;
+                    
+                    if (elementType === 'text') {
+                        // For tekst, brug fontSize som højde og beregn bredde baseret på tekst længde
+                        elementHeight = element.fontSize || 24;
+                        elementWidth = (element.text || '').length * (element.fontSize || 24) * 0.6; // Approksimativ bredde
+                    } else {
+                        // For billeder, brug faktiske dimensioner
+                        elementWidth = element.width || 100;
+                        elementHeight = element.height || 100;
+                    }
                     
                     // Calculate position and size based on canvas dimensions
                     const left = (element.x / CANVAS_WIDTH) * 100;
@@ -481,7 +493,6 @@
                     const width = (elementWidth / CANVAS_WIDTH) * 100;
                     const height = (elementHeight / CANVAS_HEIGHT) * 100;
                     
-                    const elementType = element.type || 'text';
                     const elementClass = elementType === 'image' ? 'image' : 'text';
                     
                     let elementText = '';
@@ -493,10 +504,8 @@
                         elementContent = `<img src="${element.src}" alt="${elementText}" />`;
                     } else {
                         elementText = element.text || `Tekst ${index + 1}`;
-                        if (elementText.length > 15) {
-                            elementText = elementText.substring(0, 15) + '...';
-                        }
-                        elementContent = elementText;
+                        // Vis teksten med korrekt styling
+                        elementContent = `<div style="font-family: ${element.font || 'Arial'}; font-size: ${element.fontSize || 24}px; color: ${element.color || '#000000'}; text-align: center; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; word-break: break-word;">${elementText}</div>`;
                     }
                     
                     // Konverter pixels til mm
