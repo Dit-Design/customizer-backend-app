@@ -140,7 +140,7 @@
         
         .canvas-views {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1rem;
         }
         
@@ -161,11 +161,12 @@
         .canvas-container {
             position: relative;
             width: 100%;
-            height: 200px;
+            height: 300px;
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 4px;
             overflow: hidden;
+            margin-bottom: 1rem;
         }
         
         .canvas-element {
@@ -183,7 +184,7 @@
         }
         
         .canvas-element.image {
-            background: rgba(0, 128, 96, 0.2);
+            background: transparent;
             border-color: #006b4d;
         }
         
@@ -192,10 +193,19 @@
             border-color: #008060;
         }
         
+        .canvas-element img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
         .element-info {
             margin-top: 0.5rem;
             font-size: 0.8rem;
             color: #6d7175;
+            background: #f8f9fa;
+            padding: 0.5rem;
+            border-radius: 4px;
         }
         
         .element-info strong {
@@ -326,6 +336,9 @@
         // Canvas dimensions (same as frontend)
         const CANVAS_WIDTH = 400;
         const CANVAS_HEIGHT = 500;
+        
+        // Conversion factor: 1 pixel ≈ 0.26 mm for DTF print
+        const PIXEL_TO_MM = 0.26;
         
         // Load ordrer når siden indlæses
         document.addEventListener('DOMContentLoaded', loadOrders);
@@ -459,16 +472,25 @@
                     const elementClass = elementType === 'image' ? 'image' : 'text';
                     
                     let elementText = '';
+                    let elementContent = '';
+                    
                     if (elementType === 'image') {
                         elementText = `Billede ${index + 1}`;
+                        // Vis det faktiske billede
+                        elementContent = `<img src="${element.src}" alt="${elementText}" />`;
                     } else {
                         elementText = element.text || `Tekst ${index + 1}`;
                         if (elementText.length > 15) {
                             elementText = elementText.substring(0, 15) + '...';
                         }
+                        elementContent = elementText;
                     }
                     
-                    const sizeText = `${Math.round(element.width)}×${Math.round(element.height)}px`;
+                    // Konverter pixels til mm
+                    const widthMm = Math.round(element.width * PIXEL_TO_MM);
+                    const heightMm = Math.round(element.height * PIXEL_TO_MM);
+                    const xMm = Math.round(element.x * PIXEL_TO_MM);
+                    const yMm = Math.round(element.y * PIXEL_TO_MM);
                     
                     // Get additional element details
                     let additionalInfo = '';
@@ -486,12 +508,12 @@
                     return `
                         <div class="canvas-element ${elementClass}" 
                              style="left: ${left}%; top: ${top}%; width: ${width}%; height: ${height}%;">
-                            ${elementText}
+                            ${elementContent}
                         </div>
                         <div class="element-info">
                             <strong>${elementText}</strong><br>
-                            Position: ${Math.round(element.x)}, ${Math.round(element.y)}<br>
-                            Størrelse: ${sizeText}<br>
+                            Position: ${Math.round(element.x)}, ${Math.round(element.y)}px (${xMm}×${yMm}mm)<br>
+                            Størrelse: ${Math.round(element.width)}×${Math.round(element.height)}px (${widthMm}×${heightMm}mm)<br>
                             ${additionalInfo ? additionalInfo + '<br>' : ''}
                             Type: ${elementType === 'image' ? 'Billede' : 'Tekst'}
                         </div>
@@ -512,7 +534,7 @@
             
             return `
                 <div class="canvas-preview-section">
-                    <div class="canvas-preview-title">🎨 Design Preview - Element Placering og Størrelser</div>
+                    <div class="canvas-preview-title">🎨 Design Preview - Element Placering og Størrelser (Pixels og mm)</div>
                     <div class="canvas-views">
                         ${viewsHtml}
                     </div>
